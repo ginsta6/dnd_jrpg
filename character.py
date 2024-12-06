@@ -1,12 +1,14 @@
 import requests
+import json
 from random import randint
+from action import Action
 
 
-class Monster():
-    def __init__(self):
-        data = self.pull_monster_data(21)
+class Character():
+    def __init__(self, data: dict):
         self._name = data["name"]
         self._type = data["type"]
+        self._max_hp = data["hit_points"]
         self._hp = data["hit_points"]
         self._ac = data["armor_class"][0]["value"]
         self._str = data["strength"]
@@ -20,10 +22,22 @@ class Monster():
         self._damage_immunities = data["damage_immunities"]
         self.condition_immunities = data["condition_immunities"]
         self._abilities = data["special_abilities"]
-        self._actions = data["actions"]
-        self._legen_actions = data["legendary_actions"]
+        self.actions = data["actions"]
+        self.legen_actions = data["legendary_actions"]
 
-    def pull_monster_data(self, ch):
+    @classmethod
+    def create_player(cls, filename: str):
+        with open(filename, "r") as file:
+            data = json.load(file)
+        return cls(data)
+
+    @classmethod
+    def create_monster(cls, challenge_rating: int):
+        data = cls.pull_monster_data(challenge_rating)
+        return cls(data)
+
+    @classmethod
+    def pull_monster_data(cls, ch):
         dnd_url = "https://www.dnd5eapi.co/api/monsters"
         headers = {"Accept": "application/json"}
 
@@ -32,8 +46,29 @@ class Monster():
         monster_dict = response["results"]
         monster_nr = randint(0, response["count"] - 1)
         monster_index ="/" + monster_dict[monster_nr]["index"]
+
         return requests.get(url=dnd_url + monster_index, headers=headers).json()
     
+    @property
+    def actions(self):
+        return self._actions
+    
+    @actions.setter
+    def actions(self, data):
+        self._actions = []
+        for entry in data:
+            self._actions.append(Action(entry))
+    
+    @property
+    def legen_actions(self):
+        return self._legen_actions
+    
+    @legen_actions.setter
+    def legen_actions(self, data):
+        self._legen_actions = []
+        for entry in data:
+            self.legen_actions.append(Action(entry))
+
     @property
     def proficiencies(self):
         return self._proficiencies
@@ -55,6 +90,21 @@ class Monster():
         for cond in data:
             cond_list.append(cond["name"])
         self._condition_immunities = cond_list
+
+    @property
+    def ac(self):
+        return self._ac
+    
+    @property
+    def hp(self):
+        return self._hp
+
+    def damage(self, amount):
+        self._hp -= amount
+        return self._hp > 0
+    
+    def heal(self, amount):
+        self._hp = min(self._max_hp, self._hp + amount)
 
     def __repr__(self):
         return (f"Name: {self._name}\n"
