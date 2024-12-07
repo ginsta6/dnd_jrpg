@@ -100,7 +100,7 @@ class Character():
         return self._hp
 
     def damage(self, amount):
-        self._hp -= amount
+        self._hp = max(0, self._hp - amount)
         return self._hp > 0
     
     def heal(self, amount):
