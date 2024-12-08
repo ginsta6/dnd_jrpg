@@ -21,6 +21,7 @@ class Character():
         self._damage_resistances = data["damage_resistances"]
         self._damage_immunities = data["damage_immunities"]
         self.condition_immunities = data["condition_immunities"]
+        self.contitions = []
         self._abilities = data["special_abilities"]
         self.actions = data["actions"]
         self.legen_actions = data["legendary_actions"]
