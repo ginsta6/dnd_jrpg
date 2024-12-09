@@ -17,19 +17,25 @@ class Action():
             f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})\n"
         )
     
-    def use_action(self, target):
+    def use_action(self, target, advantage: int):
         if self._usage:
-            # Special use algorithm
+            # Special use algorithm (saving throw for target)
             ...
         elif self._name == "Multiattack":
             # multiattack alogrithm
             ...
         elif self._damage:
             # regular attack algorithm
-            self._regular_attack(target)
+            self._regular_attack(target, advantage)
 
-    def _regular_attack(self, target):
-        to_hit = Dice.roll_dice() + self._bonus
-        if to_hit >= target.ac:
+    def _regular_attack(self, target, advantage: int):
+        if advantage > 0:
+            to_hit = max(Dice.roll_dice(), Dice.roll_dice()) + self._bonus
+        elif advantage < 0:
+            to_hit = min(Dice.roll_dice(), Dice.roll_dice()) + self._bonus
+        else:
+            to_hit = Dice.roll_dice() + self._bonus
+            
+        if to_hit >= target.character.ac:
             damage = Dice.roll_dice(self._damage[0]["damage_dice"])
-            target.damage(damage)
+            target.status_tracker.damage(damage)

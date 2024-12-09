@@ -15,5 +15,17 @@ class Combatant(pygame.sprite.Sprite):
     def update(self):
         ...
 
+    def apply_condition(self, condition):
+        self.status_tracker.apply_condition(condition)
+
+    def remove_condition(self, condition):
+        self.status_tracker.remove_condition(condition)
+
+    def get_status(self):
+        return self.status_tracker.show_status()
+    
+    def use_action(self, action_id, target):
+        self.character.use_action(action_id, target, self.status_tracker.attributes)
+
     def __str__(self):
-        return self.character.__str__()
+        return f"{self.character._name} - {self.character._type} - HP: {self.status_tracker.current_hp} - AC: {self.character._ac}"

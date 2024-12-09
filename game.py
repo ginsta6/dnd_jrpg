@@ -65,4 +65,6 @@ class Game():
         self.ui.add_text("enemy1", str(self.enemies[0]),10, 30)
 
     def button_click(self):
-        self.player.character.actions[0].use_action(self.enemies[0].character)
+        self.player.use_action(0, self.enemies[0])
+        self.player.apply_condition("Blinded")
+        print(self.player.get_status())
