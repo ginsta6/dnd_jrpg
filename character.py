@@ -8,7 +8,6 @@ class Character():
     def __init__(self, data: dict):
         self._name = data["name"]
         self._type = data["type"]
-        self._max_hp = data["hit_points"]
         self._hp = data["hit_points"]
         self._ac = data["armor_class"][0]["value"]
         self._str = data["strength"]
@@ -21,6 +20,7 @@ class Character():
         self._damage_resistances = data["damage_resistances"]
         self._damage_immunities = data["damage_immunities"]
         self.condition_immunities = data["condition_immunities"]
+        self.contitions = []
         self._abilities = data["special_abilities"]
         self.actions = data["actions"]
         self.legen_actions = data["legendary_actions"]
@@ -98,13 +98,17 @@ class Character():
     @property
     def hp(self):
         return self._hp
-
-    def damage(self, amount):
-        self._hp = max(0, self._hp - amount)
-        return self._hp > 0
     
-    def heal(self, amount):
-        self._hp = min(self._max_hp, self._hp + amount)
+    def use_action(self, action_id, target, my_attributes):
+        if my_attributes["attack_advantage"] == my_attributes["attack_disadvantage"]: #both cancel out or none
+            self.actions[action_id].use_action(target, 0)
+        elif my_attributes["attack_advantage"]:
+            self.actions[action_id].use_action(target, 1)
+            # adv
+        elif my_attributes["attack_disadvantage"]:
+            self.actions[action_id].use_action(target, -1)
+            # dis
+            
 
     def __repr__(self):
         return (f"Name: {self._name}\n"
@@ -125,5 +129,3 @@ class Character():
                     f"Actions: {self._actions if self._actions else 'None'}\n"
                     f"Legendary Actions: {self._legen_actions if self._legen_actions else 'None'}")
     
-    def __str__(self):
-        return f"{self._name} - {self._type} - HP: {self._hp} - AC: {self._ac}"

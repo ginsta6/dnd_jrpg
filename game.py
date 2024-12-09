@@ -1,6 +1,6 @@
 import pygame
-from character import Character
-from player import Player
+from character_factory import CharacterFactory
+from combatant import Combatant
 from ui import UIManager
 from button import Button
 
@@ -15,15 +15,16 @@ class Game():
         self.all_sprites = pygame.sprite.Group()
 
         # Player
-        self.player = Player(375, 275)
+        self.pc_factory = CharacterFactory(source_type="json", data="./data/berserker.json", x=200, y=200)
+        self.player = self.pc_factory.get_character()
         self.all_sprites.add(self.player)
 
         # UI
         self.ui = UIManager(self.screen, self.font, "Blue")
-        self.ui.add_text("player", str(self.player.character), 10,10)
+        self.ui.add_text("player", str(self.player), 10,10)
 
         # Enemies
-        self.enemies = []
+        self.enemies: list[Combatant] = []
         self.add_enemy()
 
         # Button
@@ -56,8 +57,14 @@ class Game():
         pygame.display.flip()
 
     def add_enemy(self):
-        self.enemies.append(Character.create_monster(2))
+        npc_factory = CharacterFactory(source_type="api", data="2", x=200, y=300)
+        npc = npc_factory.get_character()
+
+        self.all_sprites.add(npc)
+        self.enemies.append(npc)
         self.ui.add_text("enemy1", str(self.enemies[0]),10, 30)
 
     def button_click(self):
-        self.player.character.actions[0].use_action(self.enemies[0])
+        self.player.use_action(0, self.enemies[0])
+        self.player.apply_condition("Blinded")
+        print(self.player.get_status())
