@@ -1,13 +1,15 @@
 import pygame
 
 class Button:
-    def __init__(self, x, y, width, height, text, font, text_color, button_color, action=None):
+    def __init__(self, x, y, width, height, text, font, text_color, button_color, act_on_click, action=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.font = font
         self.text_color = text_color
         self.button_color = button_color
         self.action = action
+        self.act_on_click = act_on_click
+        self.clicked = False
 
     def draw(self, screen):
         # Draw the button's background
@@ -26,5 +28,6 @@ class Button:
         """Handle click event on the button."""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
             if self.is_hovered(pygame.mouse.get_pos()):
-                if self.action:
+                self.clicked = True
+                if self.act_on_click and self.action:
                     self.action()

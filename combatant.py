@@ -27,5 +27,9 @@ class Combatant(pygame.sprite.Sprite):
     def use_action(self, action_id, target):
         self.character.use_action(action_id, target, self.status_tracker.attributes)
 
+    def handle_click(self, mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
+            return self.character._name
+
     def __str__(self):
         return f"{self.character._name} - {self.character._type} - HP: {self.status_tracker.current_hp} - AC: {self.character._ac}"

@@ -5,19 +5,32 @@ class UIManager:
         self.screen = screen
         self.font = font
         self.color = color
-        self.elements = {}
+        self.text_elements = {}
+        self.button_elements = {}
+        self.y_padding = 0
 
     def add_text(self, name, text, x, y):
         """Add a text element to the UI."""
-        self.elements[name] = {"text": text, "pos": (x, y)}
+        self.text_elements[name] = {"text": text, "pos": (x, y + self.y_padding)}
+        self.y_padding += y
 
     def update_text(self, name, new_text):
         """Update the text of an existing element."""
-        if name in self.elements:
-            self.elements[name]["text"] = new_text
+        if name in self.text_elements:
+            self.text_elements[name]["text"] = new_text
+
+    def add_button(self, name, button):
+        self.button_elements[name] = button
+
+    def handle_event(self, event):
+        for button in self.button_elements.values():
+            button.handle_event(event)
 
     def draw(self):
         """Render all UI elements to the screen."""
-        for element in self.elements.values():
+        for element in self.text_elements.values():
             text_surface = self.font.render(element["text"], True, self.color)
             self.screen.blit(text_surface, element["pos"])
+
+        for button in self.button_elements.values():
+            button.draw(self.screen)
