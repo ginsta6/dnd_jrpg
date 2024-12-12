@@ -1,6 +1,7 @@
 import pygame
 from character import Character
 from status_tracker import StatusTracker
+from random import randint
 
 class Combatant(pygame.sprite.Sprite):
     def __init__(self, x, y, character: Character, status_tracker: StatusTracker):
@@ -26,6 +27,10 @@ class Combatant(pygame.sprite.Sprite):
     
     def use_action(self, action_id, target):
         self.character.use_action(action_id, target, self.status_tracker.attributes)
+
+    def use_random_action(self, target):
+        action_id = randint(0, self.character.actions.__len__() - 1)
+        return self.character.use_action(action_id, target, self.status_tracker.attributes)
 
     def handle_click(self, mouse_pos):
         if self.rect.collidepoint(mouse_pos):

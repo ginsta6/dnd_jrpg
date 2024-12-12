@@ -10,12 +10,6 @@ class Action():
         self._damage = data.get("damage") # maybe make a class or struct or something. define the parameters somehow. Action can have multiple damage types
         self._options = data.get("options")
 
-    def __repr__(self):
-        return (
-            f"Action(name={self._name!r}, description={self._description!r}, "
-            f"usage={self._usage!r}, bonus={self._bonus!r}, "
-            f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})\n"
-        )
     
     def use_action(self, target, advantage: int):
         if self._usage:
@@ -39,3 +33,10 @@ class Action():
         if to_hit >= target.character.ac:
             damage = Dice.roll_dice(self._damage[0]["damage_dice"])
             target.status_tracker.damage(damage)
+
+    def __repr__(self):
+        return (
+            f"Action(name={self._name!r}, description={self._description!r}, "
+            f"usage={self._usage!r}, bonus={self._bonus!r}, "
+            f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})\n"
+        )

@@ -7,6 +7,7 @@ class UIManager:
         self.color = color
         self.text_elements = {}
         self.button_elements = {}
+        self.console = []
         self.y_padding = 0
 
     def add_text(self, name, text, x, y):
@@ -22,9 +23,25 @@ class UIManager:
     def add_button(self, name, button):
         self.button_elements[name] = button
 
+    def add_to_console(self, text):
+        self.console.append(text)
+
     def handle_event(self, event):
         for button in self.button_elements.values():
             button.handle_event(event)
+
+    def need_target(self) -> bool:
+        for button in self.button_elements.values():
+            if not button.act_on_click and button.clicked:
+                return True
+        return False
+    
+    def act_with_target(self):
+        for button in self.button_elements.values():
+            if not button.act_on_click and button.clicked:
+                button.action()
+                button.clicked = False
+                return 
 
     def draw(self):
         """Render all UI elements to the screen."""
@@ -34,3 +51,7 @@ class UIManager:
 
         for button in self.button_elements.values():
             button.draw(self.screen)
+
+        for text in self.console:
+            text_surface = self.font.render(text, True, self.color)
+            self.screen.blit(text_surface, (400, 400))

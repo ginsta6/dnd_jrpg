@@ -108,6 +108,7 @@ class Character():
         elif my_attributes["attack_disadvantage"]:
             self.actions[action_id].use_action(target, -1)
             # dis
+        return f"{self._name} is using {self.actions[action_id]}"
             
 
     def __repr__(self):

@@ -19,6 +19,7 @@ class Game():
         self.pc_factory = CharacterFactory(source_type="json", data="./data/berserker.json", x=200, y=200)
         self.player = self.pc_factory.get_character()
         self.all_sprites.add(self.player)
+        self.player_turn = True
 
         # UI
         self.ui = UIManager(self.screen, self.font, "Green")
@@ -32,7 +33,7 @@ class Game():
 
         # Button
         button1 = Button(100, 100, 200, 50, "Roll to hit", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.player,self.enemies[self.target]))
-        button2 = Button(400, 100, 200, 50, "Potion", self.font, "White", "Blue", True, action=lambda: ba.heal_target(self.player))        
+        button2 = Button(400, 100, 200, 50, "Potion", self.font, "White", "Blue", False, action=lambda: ba.heal_target(self.enemies[self.target]))        
         self.ui.add_button("roll" ,button1)
         self.ui.add_button("heal" ,button2)
         
@@ -53,14 +54,24 @@ class Game():
 
             # Check if someone was selected
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.ui.button_elements["roll"].clicked:
-                    for sprite in self.all_sprites:
-                        self.target = sprite.handle_click(event.pos)
-                        if self.target:
-                            self.ui.button_elements["roll"].action()
-                            self.ui.button_elements["roll"].clicked = False
-                            self.target = ""
+                self.handle_sprite_click(event)
 
+        if not self.player_turn:
+            self.cpu_turn()
+
+    def handle_sprite_click(self, event):
+        if self.ui.need_target():
+            for sprite in self.all_sprites:
+                self.target = sprite.handle_click(event.pos)
+                if self.target:
+                    self.ui.act_with_target()
+                    self.target = ""
+                    self.player_turn = False
+
+    def cpu_turn(self):
+        for enemy in self.enemies.values():
+            self.ui.add_to_console(enemy.use_random_action(self.player))
+        self.player_turn = True
 
     def update(self):
         self.all_sprites.update()
