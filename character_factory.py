@@ -6,21 +6,21 @@ from combatant import Combatant
 from random import randint
 
 class CharacterFactory():
-    def __init__(self, source_type, data, x, y):
+    def __init__(self, source_type, data, x, y, image_path= ""):
         self.character = None
         self.status_tracker = None
         self.combatant = None
 
         if source_type == "json":
-            self.create_from_json(data, x, y)
+            self.create_from_json(data, x, y, image_path)
         elif source_type == "api":
             self.create_from_api(data, x, y)
 
-    def create_from_json(self, file_name, x, y):
+    def create_from_json(self, file_name, x, y, image_path):
         with open(file_name, "r") as file:
             character_data = json.load(file)
 
-        self.create_character(character_data, x, y)
+        self.create_character(character_data, x, y, image_path)
 
     def create_from_api(self, ch_rating, x, y):
         dnd_url = "https://www.dnd5eapi.co/api/monsters"
@@ -34,13 +34,13 @@ class CharacterFactory():
 
         character_data = requests.get(url=dnd_url + monster_index, headers=headers).json()
 
-        self.create_character(character_data, x ,y)
+        self.create_character(character_data, x ,y, f"./assets/{character_data["type"]}.png")
 
 
-    def create_character(self, character_data, x, y):
+    def create_character(self, character_data, x, y, image_path):
         self.character = Character(character_data)
         self.status_tracker = StatusTracker(self.character)
-        self.combatant = Combatant(x,y,self.character,self.status_tracker)
+        self.combatant = Combatant(x,y,self.character,self.status_tracker, image_path)
         
     def get_character(self) -> Combatant:
         return self.combatant
