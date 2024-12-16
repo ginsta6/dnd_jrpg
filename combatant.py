@@ -4,10 +4,11 @@ from status_tracker import StatusTracker
 from random import randint
 
 class Combatant(pygame.sprite.Sprite):
-    def __init__(self, x, y, character: Character, status_tracker: StatusTracker):
+    def __init__(self, x, y, character: Character, status_tracker: StatusTracker, image_path: str):
         super().__init__()
-        self.image = pygame.Surface((50,50))
-        self.image.fill("Blue")
+        self.image = pygame.Surface((100,100))
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (100,100))
         self.rect = self.image.get_rect(topleft=(x,y))
         self.character = character
         self.status_tracker = status_tracker

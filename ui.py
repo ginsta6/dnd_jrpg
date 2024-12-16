@@ -1,13 +1,16 @@
 import pygame
 
 class UIManager:
-    def __init__(self, screen, font, color):
+    def __init__(self, screen, color):
         self.screen = screen
-        self.font = font
+        self.font = pygame.font.Font("./assets/PixelatedEleganceRegular.ttf", 20)
+        self.cfont = pygame.font.Font("./assets/PixelatedEleganceRegular.ttf", 15)
         self.color = color
         self.text_elements = {}
         self.button_elements = {}
         self.console = []
+        self.cwidth = 900
+        self.cheight = 150
         self.y_padding = 0
 
     def add_text(self, name, text, x, y):
@@ -52,6 +55,10 @@ class UIManager:
         for button in self.button_elements.values():
             button.draw(self.screen)
 
-        for text in self.console:
-            text_surface = self.font.render(text, True, self.color)
-            self.screen.blit(text_surface, (400, 400))
+
+    def update_console(self):
+        textbox_surface = pygame.Surface((self.cwidth, len(self.console) * 25))
+        for i, line in enumerate(self.console):
+            text_surface = self.cfont.render(line, True, self.color)
+            textbox_surface.blit(text_surface, (10,10 + i * 25))
+        return textbox_surface

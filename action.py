@@ -40,3 +40,6 @@ class Action():
             f"usage={self._usage!r}, bonus={self._bonus!r}, "
             f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})\n"
         )
+    
+    def __str__(self):
+        return self._name
