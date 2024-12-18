@@ -58,6 +58,7 @@ class UIManager:
 
     def update_console(self):
         textbox_surface = pygame.Surface((self.cwidth, len(self.console) * 25))
+        textbox_surface.fill((0,0,0))
         for i, line in enumerate(self.console):
             text_surface = self.cfont.render(line, True, self.color)
             textbox_surface.blit(text_surface, (10,10 + i * 25))

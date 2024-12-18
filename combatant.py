@@ -12,10 +12,17 @@ class Combatant(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x,y))
         self.character = character
         self.status_tracker = status_tracker
+        self.bob = True
 
 
     def update(self):
-        ...
+        if self.bob:
+            self.rect.y += 5
+            self.bob = False
+        else:
+            self.rect.y -= 5
+            self.bob = True
+
 
     def apply_condition(self, condition):
         self.status_tracker.apply_condition(condition)

@@ -15,6 +15,8 @@ class Game():
         self.font = pygame.font.Font("./assets/PixelatedEleganceRegular.ttf", 20)
         self.running = True
 
+        self.background_image = pygame.image.load("./assets/bg.png")
+
         self.all_sprites = OrderedDictGroup()
 
         # Player
@@ -50,7 +52,7 @@ class Game():
             self.handle_events()
             self.update()
             self.draw()
-            self.clock.tick(60)
+            self.clock.tick(5)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -93,15 +95,16 @@ class Game():
         self.textbox_surface = self.ui.update_console()
 
     def draw(self):
-        self.screen.fill("Black")
+        self.screen.blit(self.background_image, (0, 0))
         self.all_sprites.draw(self.screen)
         self.ui.draw()
+        pygame.draw.rect(self.screen, "Black", pygame.Rect(10,10, 900, 150), 0)
         self.screen.blit(self.textbox_surface, (10, 10), (0, self.scroll_offset, 900, 150))
         pygame.draw.rect(self.screen, "White", pygame.Rect(10,10, 900, 150), 2)  # Outline the text box
         pygame.display.flip()
 
     def add_enemy(self, x, y):
-        npc_factory = CharacterFactory(source_type="api", data="2", x=x, y=y, image_path="./assets/aberration.png")
+        npc_factory = CharacterFactory(source_type="api", data="2", x=x, y=y)
         npc = npc_factory.get_character()
 
         self.all_sprites.add_with_key(npc.character._name, npc)
