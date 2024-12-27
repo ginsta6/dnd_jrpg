@@ -34,7 +34,7 @@ class Combatant(pygame.sprite.Sprite):
         return self.status_tracker.show_status()
     
     def use_action(self, action_id, target):
-        self.character.use_action(action_id, target, self.status_tracker.attributes)
+        return self.character.use_action(action_id, target, self.status_tracker.attributes)
 
     def use_random_action(self, target):
         action_id = randint(0, self.character.actions.__len__() - 1)

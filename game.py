@@ -5,6 +5,7 @@ from combatant import Combatant
 from ui import UIManager
 from button import Button
 from ordered_group import OrderedDictGroup
+from turn_manager import TurnManager
 from random import choice
 
 class Game():
@@ -18,6 +19,7 @@ class Game():
         self.background_image = pygame.image.load("./assets/bg.png")
 
         self.all_sprites = OrderedDictGroup()
+        self.turn_manager = TurnManager()
 
         # Player
         pc_factory_ber = CharacterFactory(source_type="json", data="./data/berserker.json", x=150, y=200, image_path="./assets/berserker.png")
@@ -26,7 +28,8 @@ class Game():
         player_aco = pc_factory_aco.get_character()
         self.all_sprites.add_with_key("Berserker",player_ber)
         self.all_sprites.add_with_key("Acolyte",player_aco)
-        self.player_turn = True
+        self.turn_manager.add_to_queue("Berserker")
+        self.turn_manager.add_to_queue("Acolyte")
 
         # UI
         self.ui = UIManager(self.screen, "Green")
@@ -39,9 +42,10 @@ class Game():
         self.target = ""
         self.add_enemy(1200, 200)
         self.add_enemy(1200, 400)
+        self.ui.add_text("turn", str(self.turn_manager), 300,60)
 
         # Button
-        button1 = Button(800, 650, 150, 25, "Attack", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.all_sprites[self.all_sprites["Berserker"].character._name],self.all_sprites[self.target]))
+        button1 = Button(800, 650, 150, 25, "Attack", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.all_sprites[self.all_sprites[self.turn_manager.take_turn()].character._name],self.all_sprites[self.target]))
         button2 = Button(800, 700, 150, 25, "Potion", self.font, "White", "Blue", False, action=lambda: ba.heal_target(self.all_sprites[self.target]))        
         self.ui.add_button("roll" ,button1)
         self.ui.add_button("heal" ,button2)
@@ -67,7 +71,7 @@ class Game():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 self.handle_sprite_click(event)
 
-        if not self.player_turn:
+        if not self.turn_manager.is_player_turn():
             self.cpu_turn()
 
     def handle_sprite_click(self, event):
@@ -75,21 +79,21 @@ class Game():
             for sprite in self.all_sprites:
                 self.target = sprite.handle_click(event.pos)
                 if self.target:
-                    self.ui.act_with_target()
+                    self.ui.add_to_console(self.ui.act_with_target())
                     self.target = ""
-                    self.player_turn = False
 
     def cpu_turn(self):
         names = ["Berserker", "Acolyte"]
-        for enemy in self.enemies.values():
+        for i in range(len(self.enemies)):
+            enemy_name = self.turn_manager.take_turn()
             cpu_target = choice(names)
-            self.ui.add_to_console(enemy.use_random_action(self.all_sprites[cpu_target]) + f"against {cpu_target}")
-        self.player_turn = True
+            self.ui.add_to_console(self.all_sprites[enemy_name].use_random_action(self.all_sprites[cpu_target]) + f" against {cpu_target}")
 
     def update(self):
         self.all_sprites.update()
         self.ui.update_text("player1", str(self.all_sprites["Berserker"]))
         self.ui.update_text("player2", str(self.all_sprites["Acolyte"]))
+        self.ui.update_text("turn", str(self.turn_manager))
         for i, key in enumerate(self.enemies):
             self.ui.update_text(f"enemy{i+1}", str(self.enemies[key]))
         self.textbox_surface = self.ui.update_console()
@@ -108,5 +112,6 @@ class Game():
         npc = npc_factory.get_character()
 
         self.all_sprites.add_with_key(npc.character._name, npc)
+        self.turn_manager.add_to_queue(npc.character._name)
         self.enemies[npc.character._name] = npc
         self.ui.add_text(f"enemy{self.enemies.__len__()}", str(self.enemies[npc.character._name]),10, 30)

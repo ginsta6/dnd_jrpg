@@ -12,7 +12,7 @@
             "value": 10
         }
     ],
-    "hit_points": 9,
+    "hit_points": 30,
     "hit_dice": "2d8",
     "hit_points_roll": "2d8",
     "speed": {

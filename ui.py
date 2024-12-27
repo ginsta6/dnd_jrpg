@@ -42,9 +42,9 @@ class UIManager:
     def act_with_target(self):
         for button in self.button_elements.values():
             if not button.act_on_click and button.clicked:
-                button.action()
                 button.clicked = False
-                return 
+                return button.action()
+                 
 
     def draw(self):
         """Render all UI elements to the screen."""
