@@ -42,9 +42,9 @@ class UIManager:
     def act_with_target(self):
         for button in self.button_elements.values():
             if not button.act_on_click and button.clicked:
-                button.action()
                 button.clicked = False
-                return 
+                return button.action()
+                 
 
     def draw(self):
         """Render all UI elements to the screen."""
@@ -58,6 +58,7 @@ class UIManager:
 
     def update_console(self):
         textbox_surface = pygame.Surface((self.cwidth, len(self.console) * 25))
+        textbox_surface.fill((0,0,0))
         for i, line in enumerate(self.console):
             text_surface = self.cfont.render(line, True, self.color)
             textbox_surface.blit(text_surface, (10,10 + i * 25))

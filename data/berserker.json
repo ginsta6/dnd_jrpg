@@ -18,7 +18,7 @@
             ]
         }
     ],
-    "hit_points": 67,
+    "hit_points": 50,
     "hit_dice": "9d8",
     "hit_points_roll": "9d8+27",
     "speed": {
