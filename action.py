@@ -1,7 +1,8 @@
 from dice import Dice
+from console import Console
 
 class Action():
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, console: Console):
         self._name = data.get("name")
         self._description = data.get("desc")
         self._usage = data.get("usage")
@@ -9,6 +10,7 @@ class Action():
         self._dc = data.get("dc") # maybe make a DC class / interface?
         self._damage = data.get("damage") # maybe make a class or struct or something. define the parameters somehow. Action can have multiple damage types
         self._options = data.get("options")
+        self._console = console
 
     
     def use_action(self, target, advantage: int):
@@ -23,16 +25,23 @@ class Action():
             self._regular_attack(target, advantage)
 
     def _regular_attack(self, target, advantage: int):
+        adjective = ""
         if advantage > 0:
             to_hit = max(Dice.roll_dice(), Dice.roll_dice()) + self._bonus
+            adjective = "with advantage"
         elif advantage < 0:
             to_hit = min(Dice.roll_dice(), Dice.roll_dice()) + self._bonus
+            adjective = "with disadvantage"
         else:
             to_hit = Dice.roll_dice() + self._bonus
+            adjective = "straight"
+
+        self._console.log(f"Rolled {adjective} and got: {to_hit}")
             
         if to_hit >= target.character.ac:
             damage = Dice.roll_dice(self._damage[0]["damage_dice"])
             target.status_tracker.damage(damage)
+            self._console.log(f"Rolled for damage and got: {damage}")
 
     def __repr__(self):
         return (

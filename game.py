@@ -21,21 +21,21 @@ class Game():
         self.all_sprites = OrderedDictGroup()
         self.turn_manager = TurnManager()
 
+        # UI
+        self.ui = UIManager(self.screen, "Green")
+        self.scroll_offset = 0
+
         # Player
-        pc_factory_ber = CharacterFactory(source_type="json", data="./data/berserker.json", x=150, y=200, image_path="./assets/berserker.png")
-        pc_factory_aco = CharacterFactory(source_type="json", data="./data/acolyte.json", x=150, y=400, image_path="./assets/acolyte.png")
+        pc_factory_ber = CharacterFactory(source_type="json", data="./data/berserker.json", x=150, y=200, console = self.ui.console, image_path="./assets/berserker.png")
+        pc_factory_aco = CharacterFactory(source_type="json", data="./data/acolyte.json", x=150, y=400, console = self.ui.console, image_path="./assets/acolyte.png")
         player_ber = pc_factory_ber.get_character()
         player_aco = pc_factory_aco.get_character()
+        self.ui.add_text("player1", str(player_ber), 10,650)
+        self.ui.add_text("player2", str(player_aco), 10,30)
         self.all_sprites.add_with_key("Berserker",player_ber)
         self.all_sprites.add_with_key("Acolyte",player_aco)
         self.turn_manager.add_to_queue("Berserker")
         self.turn_manager.add_to_queue("Acolyte")
-
-        # UI
-        self.ui = UIManager(self.screen, "Green")
-        self.ui.add_text("player1", str(player_ber), 10,650)
-        self.ui.add_text("player2", str(player_aco), 10,30)
-        self.scroll_offset = 0
 
         # Enemies
         self.enemies: dict[str,Combatant] = {}
@@ -79,7 +79,7 @@ class Game():
             for sprite in self.all_sprites:
                 self.target = sprite.handle_click(event.pos)
                 if self.target:
-                    self.ui.add_to_console(self.ui.act_with_target())
+                    self.ui.act_with_target()
                     self.target = ""
 
     def cpu_turn(self):
@@ -87,7 +87,7 @@ class Game():
         for i in range(len(self.enemies)):
             enemy_name = self.turn_manager.take_turn()
             cpu_target = choice(names)
-            self.ui.add_to_console(self.all_sprites[enemy_name].use_random_action(self.all_sprites[cpu_target]) + f" against {cpu_target}")
+            self.all_sprites[enemy_name].use_random_action(self.all_sprites[cpu_target])
 
     def update(self):
         self.all_sprites.update()
@@ -108,7 +108,7 @@ class Game():
         pygame.display.flip()
 
     def add_enemy(self, x, y):
-        npc_factory = CharacterFactory(source_type="api", data="2", x=x, y=y)
+        npc_factory = CharacterFactory(source_type="api", data="2", x=x, y=y ,console = self.ui.console)
         npc = npc_factory.get_character()
 
         self.all_sprites.add_with_key(npc.character._name, npc)

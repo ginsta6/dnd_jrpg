@@ -4,25 +4,26 @@ from character import Character
 from status_tracker import StatusTracker
 from combatant import Combatant
 from random import randint
+from console import Console
 
 class CharacterFactory():
-    def __init__(self, source_type, data, x, y, image_path= ""):
+    def __init__(self, source_type, data, x, y,console: Console, image_path= ""):
         self.character = None
         self.status_tracker = None
         self.combatant = None
 
         if source_type == "json":
-            self.create_from_json(data, x, y, image_path)
+            self.create_from_json(data, x, y, image_path, console)
         elif source_type == "api":
-            self.create_from_api(data, x, y)
+            self.create_from_api(data, x, y, console)
 
-    def create_from_json(self, file_name, x, y, image_path):
+    def create_from_json(self, file_name, x, y, image_path, console: Console):
         with open(file_name, "r") as file:
             character_data = json.load(file)
 
-        self.create_character(character_data, x, y, image_path)
+        self.create_character(character_data, x, y, image_path, console)
 
-    def create_from_api(self, ch_rating, x, y):
+    def create_from_api(self, ch_rating, x, y, console: Console):
         dnd_url = "https://www.dnd5eapi.co/api/monsters"
         headers = {"Accept": "application/json"}
 
@@ -34,13 +35,13 @@ class CharacterFactory():
 
         character_data = requests.get(url=dnd_url + monster_index, headers=headers).json()
 
-        self.create_character(character_data, x ,y, f"./assets/{character_data["type"]}.png")
+        self.create_character(character_data, x ,y, f"./assets/{character_data["type"]}.png", console)
 
 
-    def create_character(self, character_data, x, y, image_path):
-        self.character = Character(character_data)
+    def create_character(self, character_data, x, y, image_path, console: Console):
+        self.character = Character(character_data, console)
         self.status_tracker = StatusTracker(self.character)
-        self.combatant = Combatant(x,y,self.character,self.status_tracker, image_path)
+        self.combatant = Combatant(x,y,self.character,self.status_tracker, image_path, console)
         
     def get_character(self) -> Combatant:
         return self.combatant

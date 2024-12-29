@@ -5,7 +5,7 @@ from action import Action
 
 
 class Character():
-    def __init__(self, data: dict):
+    def __init__(self, data: dict, console):
         self._name = data["name"]
         self._type = data["type"]
         self._hp = data["hit_points"]
@@ -22,8 +22,10 @@ class Character():
         self.condition_immunities = data["condition_immunities"]
         self.contitions = []
         self._abilities = data["special_abilities"]
-        self.actions = data["actions"]
+        self.actions = (data["actions"], console)
         self.legen_actions = data["legendary_actions"]
+
+        self._console = console
 
     @classmethod
     def create_player(cls, filename: str):
@@ -54,10 +56,11 @@ class Character():
         return self._actions
     
     @actions.setter
-    def actions(self, data):
+    def actions(self, value):
+        data, console = value
         self._actions = []
         for entry in data:
-            self._actions.append(Action(entry))
+            self._actions.append(Action(entry, console))
     
     @property
     def legen_actions(self):
@@ -100,6 +103,8 @@ class Character():
         return self._hp
     
     def use_action(self, action_id, target, my_attributes):
+        action_string = f"{self._name} is using {self.actions[action_id]} againgst {target.character._name}"
+        self._console.log(action_string)
         if my_attributes["attack_advantage"] == my_attributes["attack_disadvantage"]: #both cancel out or none
             self.actions[action_id].use_action(target, 0)
         elif my_attributes["attack_advantage"]:
@@ -108,7 +113,7 @@ class Character():
         elif my_attributes["attack_disadvantage"]:
             self.actions[action_id].use_action(target, -1)
             # dis
-        return f"{self._name} is using {self.actions[action_id]}"
+        # return f"{self._name} is using {self.actions[action_id]}"
             
 
     def __repr__(self):
