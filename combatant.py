@@ -1,7 +1,7 @@
 import pygame
 from character import Character
 from status_tracker import StatusTracker
-from random import randint
+from random import shuffle
 from console import Console
 
 class Combatant(pygame.sprite.Sprite):
@@ -40,8 +40,16 @@ class Combatant(pygame.sprite.Sprite):
         self.character.use_action(action_id, target, self.status_tracker.attributes)
 
     def use_random_action(self, target):
-        action_id = randint(0, self.character.actions.__len__() - 1)
-        self.character.use_action(action_id, target, self.status_tracker.attributes)
+        action_indices = list(range(len(self.character.actions)))
+        shuffle(action_indices)  # Randomize the order of actions
+
+        for action_id in action_indices:
+            if not self.character.check_action(action_id):
+                self.character.use_action(action_id, target, self.status_tracker.attributes)
+                return
+
+        # If no valid action is found
+        self.status_tracker.attributes.console.log("No valid actions available.")
 
     def handle_click(self, mouse_pos):
         if self.rect.collidepoint(mouse_pos):

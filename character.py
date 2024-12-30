@@ -11,6 +11,7 @@ class Character():
         self._hp = data["hit_points"]
         self._ac = data["armor_class"][0]["value"]
         self._str = data["strength"]
+        self._dex = data["dexterity"]
         self._con = data["constitution"]
         self._int = data["intelligence"]
         self._wis = data["wisdom"]
@@ -22,7 +23,7 @@ class Character():
         self.condition_immunities = data["condition_immunities"]
         self.contitions = []
         self._abilities = data["special_abilities"]
-        self.actions = (data["actions"], console)
+        self.actions = (data["actions"] + data["special_abilities"], console)
         self.legen_actions = data["legendary_actions"]
 
         self._console = console
@@ -103,6 +104,9 @@ class Character():
         return self._hp
     
     def use_action(self, action_id, target, my_attributes):
+        if my_attributes["can_take_actions"] == False:
+            self._console.log(f"{self._name} can't do that right now")
+            return
         action_string = f"{self._name} is using {self.actions[action_id]} againgst {target.character._name}"
         self._console.log(action_string)
         if my_attributes["attack_advantage"] == my_attributes["attack_disadvantage"]: #both cancel out or none
@@ -113,7 +117,26 @@ class Character():
         elif my_attributes["attack_disadvantage"]:
             self.actions[action_id].use_action(target, -1)
             # dis
-        # return f"{self._name} is using {self.actions[action_id]}"
+
+    def check_action(self, action_id):
+       return self.actions[action_id].is_name_and_description_only()
+
+    def get_skill(self, skill_name: str):
+        """Returns the ability score corresponding to a skill or saving throw."""
+        skill_name = skill_name.lower()
+        
+        skill_map = {
+            "strength": self._str,
+            "dexterity": self._dex,
+            "constitution": self._con,
+            "intelligence": self._int,
+            "wisdom": self._wis,
+            "charisma": self._cha,
+        }
+
+        # Check if the skill is part of the stat abilities
+        if skill_name in skill_map:
+            return skill_map[skill_name]
             
 
     def __repr__(self):
