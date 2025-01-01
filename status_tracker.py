@@ -50,3 +50,9 @@ class StatusTracker():
         status += attributes
 
         return status
+    
+    def get_status(self):
+        return ", ".join(self.conditions) or "Clear"
+    
+    def is_dead(self):
+        return self.current_hp <= 0

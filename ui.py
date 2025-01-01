@@ -17,8 +17,16 @@ class UIManager:
 
     def add_text(self, name, text, x, y):
         """Add a text element to the UI."""
-        self.text_elements[name] = {"text": text, "pos": (x, y + self.y_padding)}
-        self.y_padding += y
+        if name in self.text_elements:
+            self.update_text(name, text)
+        else:
+            self.text_elements[name] = {"text": text, "pos": (x, y + self.y_padding)}
+            self.y_padding += y
+
+    def remove_text(self, name):
+        """Remove a text element from the UI."""
+        if name in self.text_elements:
+            del self.text_elements[name]
 
     def update_text(self, name, new_text):
         """Update the text of an existing element."""

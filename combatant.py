@@ -60,4 +60,4 @@ class Combatant(pygame.sprite.Sprite):
             return self.character._name
 
     def __str__(self):
-        return f"{self.character._name} - {self.character._type} - HP: {self.status_tracker.current_hp} - AC: {self.character._ac}"
+        return f"{self.character._name} - {self.character._type} - HP: {self.status_tracker.current_hp} - AC: {self.character._ac} - Conditions: {self.status_tracker.get_status()}"

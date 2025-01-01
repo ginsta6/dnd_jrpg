@@ -2,6 +2,7 @@ class TurnManager:
     def __init__(self):
         self.turn_queue: list[str] = []
         self.current_turn: int = 0
+        self.player_names: list[str] = ["Berserker", "Acolyte"]
 
     def add_to_queue(self, item: str):
         if isinstance(item, list):
@@ -12,6 +13,8 @@ class TurnManager:
     def remove_from_queue(self, item: str):
         try:
             self.turn_queue.remove(item)
+            if item in self.player_names:
+                self.player_names.remove(item)
         except ValueError:
             print("Combatant does not exist in turn queue")
 
@@ -21,7 +24,8 @@ class TurnManager:
         return ans
     
     def is_player_turn(self):
-        if self.current_turn == 0 or self.current_turn == 1:
+        current_combatant = self.turn_queue[self.current_turn]
+        if current_combatant in self.player_names:
             return True
         else:
             return False
