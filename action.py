@@ -1,30 +1,67 @@
 from dice import Dice
 from console import Console
 from rules import Ruleset
+from random import choice
 import re
 
 class Action():
     def __init__(self, data: dict, console: Console):
+        self._console = console
         self._name = data.get("name")
         self._description = data.get("desc")
         self._usage = data.get("usage")
         self._bonus = data.get("attack_bonus")
         self._dc = data.get("dc") # maybe make a DC class / interface?
         self._damage = data.get("damage") # maybe make a class or struct or something. define the parameters somehow. Action can have multiple damage types
-        self._options = data.get("options")
-        self._console = console
+        self._options = self._set_options(data.get("options"), console)
+        self._actions = data.get("actions")
 
     
     def use_action(self, target, advantage: int):
-        if self._usage:
+        """
+        Executes the action. Depending on the type of action, different logic is applied.
+
+        Args:
+            target: The target of the action. Combatant object.
+            advantage: Modifier for advantage/disadvantage during the action.
+        """
+        if self._name == "Multiattack":
+            # Multiattack algorithm
+            self._multiattack(target, advantage)
+
+        elif self._options:
+            # Choose a random option and use it as the action
+            random_option = choice(self._options)
+            self._console.log(f"{self._name} chose {random_option._name}")
+            random_option.use_action(target, advantage)
+        
+        elif self._dc:
             # Special use algorithm (saving throw for target)
             self._special_attack(target)
-        elif self._name == "Multiattack":
-            # multiattack alogrithm
-            ...
+        
+        
         elif self._damage:
-            # regular attack algorithm
-            self._regular_attack(target, advantage)
+            # Regular attack algorithm
+            damage_type = self._damage[0]["damage_type"]["index"]
+            if damage_type == "healing":
+                self._healing_attack(target)
+            else:
+                self._regular_attack(target, advantage)
+        
+        else:
+            self._console.log(f"Action {self._name} has no executable logic.")
+
+    def _multiattack(self, target, advantage: int):
+        for attack in self._options:
+            attack.use_action(target, advantage)
+
+    def _healing_attack(self, target):
+        # Roll the healing dice and apply the healing to the target
+        healing = Dice.roll_dice(self._damage[0]["damage_dice"])
+        target.status_tracker.heal(healing)
+
+        # Log the healing done
+        self._console.log(f"Healed {target.character._name} for {healing} HP.")
 
     def _special_attack(self, target):
         if self._usage == "recharge":
@@ -123,6 +160,9 @@ class Action():
         )
     
     def get_condition(self):
+        if self._description is None:
+            return None, None, None
+
         # Iterate over the conditions to check if any of them are mentioned in the description
         for condition in Ruleset.conditions.keys():
             if re.search(rf"\b{condition}\b", self._description, re.IGNORECASE):
@@ -138,12 +178,29 @@ class Action():
                     # If no DC value found, just return the condition
                     return condition, None, None
         return None, None, None  # Return None if no condition is found
+    
+    def _set_options(self, options_data, console):
+        """
+        Setter method for _options. Converts the raw 'options' data into a list of Action objects.
+        """
+        if not options_data:
+            return []  
+
+        options = []
+        for option in options_data["from"]["options"]: 
+            if isinstance(option, dict):  # Check if the option is structured as an Action-like dictionary
+                options.append(Action(option, console))
+            else:
+                self._console.log(f"Invalid option format: {option}")
+
+        return options
 
     def __repr__(self):
         return (
             f"Action(name={self._name!r}, description={self._description!r}, "
             f"usage={self._usage!r}, bonus={self._bonus!r}, "
-            f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})\n"
+            f"dc={self._dc!r}, damage={self._damage!r}, options={self._options!r})"
+            f"actions={self._actions}\n"
         )
     
     def __str__(self):

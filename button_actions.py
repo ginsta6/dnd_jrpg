@@ -1,5 +1,5 @@
-def action_on_target(player, enemy):
-    player.use_action(0, enemy)  
+def action_on_target(player, target):
+    player.use_action(0, target) 
 
-def heal_target(target):
-    target.status_tracker.heal(15)
+def special_on_target(player, target):
+    player.use_action(1, target)  

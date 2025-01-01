@@ -45,8 +45,8 @@ class Game():
         self.ui.add_text("turn", str(self.turn_manager), 300,60)
 
         # Button
-        button1 = Button(800, 650, 150, 25, "Attack", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.all_sprites[self.all_sprites[self.turn_manager.take_turn()].character._name],self.all_sprites[self.target]))
-        button2 = Button(800, 700, 150, 25, "Potion", self.font, "White", "Blue", False, action=lambda: ba.heal_target(self.all_sprites[self.target]))        
+        button1 = Button(800, 650, 150, 25, "Attack", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.all_sprites[self.turn_manager.take_turn()],self.all_sprites[self.target]))
+        button2 = Button(800, 700, 150, 25, "Special", self.font, "White", "Blue", False, action=lambda: ba.special_on_target(self.all_sprites[self.turn_manager.take_turn()],self.all_sprites[self.target]))       
         self.ui.add_button("roll" ,button1)
         self.ui.add_button("heal" ,button2)
         
@@ -84,7 +84,7 @@ class Game():
 
     def cpu_turn(self):
         names = ["Berserker", "Acolyte"]
-        for i in range(len(self.enemies)):
+        for _ in range(len(self.enemies)):
             enemy_name = self.turn_manager.take_turn()
             cpu_target = choice(names)
             self.all_sprites[enemy_name].use_random_action(self.all_sprites[cpu_target])
