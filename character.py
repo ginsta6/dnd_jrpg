@@ -11,6 +11,7 @@ class Character():
         self._hp = data["hit_points"]
         self._ac = data["armor_class"][0]["value"]
         self._str = data["strength"]
+        self._dex = data["dexterity"]
         self._con = data["constitution"]
         self._int = data["intelligence"]
         self._wis = data["wisdom"]
@@ -22,8 +23,8 @@ class Character():
         self.condition_immunities = data["condition_immunities"]
         self.contitions = []
         self._abilities = data["special_abilities"]
-        self.actions = (data["actions"], console)
-        self.legen_actions = data["legendary_actions"]
+        self.actions = (data["actions"] + data["special_abilities"], console)
+        self.legen_actions = (data["legendary_actions"], console)
 
         self._console = console
 
@@ -61,16 +62,31 @@ class Character():
         self._actions = []
         for entry in data:
             self._actions.append(Action(entry, console))
+        self.add_multiattack()
+
+    def add_multiattack(self):
+        for action in self._actions:
+            if action._name == "Multiattack":
+                # Process the Multiattack and add the individual attacks to options
+                for multiattack_action in action._actions:  # Look at each sub-action in Multiattack
+                    action_name = multiattack_action["action_name"]
+                    action_count = int(multiattack_action["count"])
+                    for _ in range(action_count):
+                        matched_attacks = [attack for attack in self._actions if attack._name == action_name]
+                        action._options.extend(matched_attacks)
+
+
     
     @property
     def legen_actions(self):
         return self._legen_actions
     
     @legen_actions.setter
-    def legen_actions(self, data):
+    def legen_actions(self, value):
+        data, console = value
         self._legen_actions = []
         for entry in data:
-            self.legen_actions.append(Action(entry))
+            self.legen_actions.append(Action(entry, console))
 
     @property
     def proficiencies(self):
@@ -103,17 +119,58 @@ class Character():
         return self._hp
     
     def use_action(self, action_id, target, my_attributes):
-        action_string = f"{self._name} is using {self.actions[action_id]} againgst {target.character._name}"
-        self._console.log(action_string)
-        if my_attributes["attack_advantage"] == my_attributes["attack_disadvantage"]: #both cancel out or none
-            self.actions[action_id].use_action(target, 0)
-        elif my_attributes["attack_advantage"]:
-            self.actions[action_id].use_action(target, 1)
-            # adv
-        elif my_attributes["attack_disadvantage"]:
-            self.actions[action_id].use_action(target, -1)
-            # dis
-        # return f"{self._name} is using {self.actions[action_id]}"
+        if not my_attributes.get("can_take_actions", True):
+            self._console.log(f"{self._name} can't do that right now")
+            return
+
+        action_name = self.actions[action_id]
+        target_name = target.character._name
+        self._console.log(f"{self._name} is using {action_name} against {target_name}")
+
+        target_attributes = target.status_tracker.attributes
+
+        # Determine advantage or disadvantage
+        advantage = my_attributes.get("attack_advantage", False) or target_attributes.get("attackers_have_advantage", False)
+        disadvantage = my_attributes.get("attack_disadvantage", False) or target_attributes.get("attackers_have_disadvantage", False)
+
+        # Calculate final advantage state
+        if advantage and disadvantage:
+            advantage_state = 0  # Both cancel out
+        elif advantage:
+            advantage_state = 1  # Advantage
+        elif disadvantage:
+            advantage_state = -1  # Disadvantage
+        else:
+            advantage_state = 0  # Neutral
+
+        # Use the action with the calculated advantage state
+        self.actions[action_id].use_action(target, advantage_state)
+
+    def check_action(self, action_id):
+       return self.actions[action_id].is_name_and_description_only()
+
+    def get_skill(self, skill_name: str):
+        """Returns the ability score corresponding to a skill or saving throw."""
+        skill_name = skill_name.lower()
+        
+        skill_map = {
+            "strength": self._str,
+            "str": self._str,  # shorthand for strength
+            "dexterity": self._dex,
+            "dex": self._dex,  # shorthand for dexterity
+            "constitution": self._con,
+            "con": self._con,  # shorthand for constitution
+            "intelligence": self._int,
+            "int": self._int,  # shorthand for intelligence
+            "wisdom": self._wis,
+            "wis": self._wis,  # shorthand for wisdom
+            "charisma": self._cha,
+            "cha": self._cha,  # shorthand for charisma
+        }
+
+        # Check if the skill is part of the stat abilities
+        if skill_name in skill_map:
+            return skill_map[skill_name]
             
 
     def __repr__(self):

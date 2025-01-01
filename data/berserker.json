@@ -34,7 +34,13 @@
     "damage_vulnerabilities": [],
     "damage_resistances": [],
     "damage_immunities": [],
-    "condition_immunities": [],
+    "condition_immunities": [
+    {
+      "index": "paralyzed",
+      "name": "Paralyzed",
+      "url": "/api/conditions/paralyzed"
+    }
+  ],
     "senses": {
         "passive_perception": 10
     },
@@ -50,7 +56,7 @@
     ],
     "actions": [
         {
-            "name": "Greataxe",
+            "name": "Greataxe swing",
             "desc": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 9 (1d12 + 3) slashing damage.",
             "attack_bonus": 5,
             "damage": [
@@ -64,7 +70,26 @@
                 }
             ],
             "actions": []
-        }
+        },
+        {
+            "name": "Restraining Strike",
+            "desc": "The berserker attempts to grapple and restrain a creature. The target must succeed on a DC 14 Strength saving throw or be restrained for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.",
+            "usage": {
+              "type": "per day",
+              "times": 3
+            },
+            "dc": {
+              "dc_type": {
+                "index": "str",
+                "name": "STR",
+                "url": "/api/ability-scores/str"
+              },
+              "dc_value": 14,
+              "success_type": "none"
+            },
+            "damage": [],
+            "actions": []
+          }
     ],
     "url": "/api/monsters/berserker",
     "legendary_actions": []
