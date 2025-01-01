@@ -1,7 +1,20 @@
 import pygame
 
+
 class Button:
-    def __init__(self, x, y, width, height, text, font, text_color, button_color, act_on_click, action=None):
+    def __init__(
+        self,
+        x,
+        y,
+        width,
+        height,
+        text,
+        font,
+        text_color,
+        button_color,
+        act_on_click,
+        action=None,
+    ):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.font = font
@@ -12,9 +25,10 @@ class Button:
         self.clicked = False
 
     def draw(self, screen):
+        """Draw the button on the screen."""
         # Draw the button's background
         pygame.draw.rect(screen, self.button_color, self.rect)
-        
+
         # Render the text on top of the button
         text_surface = self.font.render(self.text, True, self.text_color)
         text_rect = text_surface.get_rect(center=self.rect.center)

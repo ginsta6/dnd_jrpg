@@ -1,6 +1,7 @@
 import pygame
 from console import Console
 
+
 class UIManager:
     def __init__(self, screen, color):
         self.screen = screen
@@ -34,24 +35,27 @@ class UIManager:
             self.text_elements[name]["text"] = new_text
 
     def add_button(self, name, button):
+        """Add a button element to the UI."""
         self.button_elements[name] = button
 
     def handle_event(self, event):
+        """Handle events for all UI elements."""
         for button in self.button_elements.values():
             button.handle_event(event)
 
     def need_target(self) -> bool:
+        """Check if any buttons need a target."""
         for button in self.button_elements.values():
             if not button.act_on_click and button.clicked:
                 return True
         return False
-    
+
     def act_with_target(self):
+        """Act on a button that requires a target."""
         for button in self.button_elements.values():
             if not button.act_on_click and button.clicked:
                 button.clicked = False
                 return button.action()
-                 
 
     def draw(self):
         """Render all UI elements to the screen."""
@@ -62,16 +66,17 @@ class UIManager:
         for button in self.button_elements.values():
             button.draw(self.screen)
 
-
     def update_console(self):
-        textbox_surface = pygame.Surface((self.cwidth, len(self._console.get_messages()) * 25))
-        textbox_surface.fill((0,0,0))
+        """Update the console with the latest messages."""
+        textbox_surface = pygame.Surface(
+            (self.cwidth, len(self._console.get_messages()) * 25)
+        )
+        textbox_surface.fill((0, 0, 0))
         for i, line in enumerate(self._console.get_messages()):
             text_surface = self.cfont.render(line, True, self.color)
-            textbox_surface.blit(text_surface, (10,10 + i * 25))
+            textbox_surface.blit(text_surface, (10, 10 + i * 25))
         return textbox_surface
-    
+
     @property
     def console(self):
         return self._console
-    

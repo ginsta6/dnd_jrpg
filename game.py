@@ -8,7 +8,8 @@ from ordered_group import OrderedDictGroup
 from turn_manager import TurnManager
 from random import choice
 
-class Game():
+
+class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((1500, 900))
         pygame.display.set_caption("DNDJRPGCEPS3000")
@@ -28,34 +29,76 @@ class Game():
         self.ui_names = ["player1", "player2", "enemy1", "enemy2"]
 
         # Player
-        pc_factory_ber = CharacterFactory(source_type="json", data="./data/berserker.json", x=150, y=200, console = self.ui.console, image_path="./assets/berserker.png")
-        pc_factory_aco = CharacterFactory(source_type="json", data="./data/acolyte.json", x=150, y=400, console = self.ui.console, image_path="./assets/acolyte.png")
+        pc_factory_ber = CharacterFactory(
+            source_type="json",
+            data="./data/berserker.json",
+            x=150,
+            y=200,
+            console=self.ui.console,
+            image_path="./assets/berserker.png",
+        )
+        pc_factory_aco = CharacterFactory(
+            source_type="json",
+            data="./data/acolyte.json",
+            x=150,
+            y=400,
+            console=self.ui.console,
+            image_path="./assets/acolyte.png",
+        )
         player_ber = pc_factory_ber.get_character()
         player_aco = pc_factory_aco.get_character()
-        self.ui.add_text("player1", str(player_ber), 10,650)
-        self.ui.add_text("player2", str(player_aco), 10,30)
-        self.all_sprites.add_with_key("Berserker",player_ber)
-        self.all_sprites.add_with_key("Acolyte",player_aco)
+        self.ui.add_text("player1", str(player_ber), 10, 650)
+        self.ui.add_text("player2", str(player_aco), 10, 30)
+        self.all_sprites.add_with_key("Berserker", player_ber)
+        self.all_sprites.add_with_key("Acolyte", player_aco)
         self.turn_manager.add_to_queue("Berserker")
         self.turn_manager.add_to_queue("Acolyte")
 
         # Enemies
         self.challenge_rating = 1
         self.player_names = ["Berserker", "Acolyte"]
-        self.enemies: dict[str,Combatant] = {}
+        self.enemies: dict[str, Combatant] = {}
         self.target = ""
         self.add_enemy(1200, 200, self.challenge_rating)
         self.add_enemy(1200, 400, self.challenge_rating)
-        self.ui.add_text("turn", str(self.turn_manager), 300,60)
+        self.ui.add_text("turn", str(self.turn_manager), 300, 60)
 
         # Button
-        button1 = Button(1300, 650, 150, 25, "Attack", self.font, "White", "Blue", False, action=lambda: ba.action_on_target(self.all_sprites[self.turn_manager.take_turn()],self.all_sprites[self.target]))
-        button2 = Button(1300, 700, 150, 25, "Special", self.font, "White", "Blue", False, action=lambda: ba.special_on_target(self.all_sprites[self.turn_manager.take_turn()],self.all_sprites[self.target]))       
-        self.ui.add_button("roll" ,button1)
-        self.ui.add_button("heal" ,button2)
-        
+        button1 = Button(
+            1300,
+            650,
+            150,
+            25,
+            "Attack",
+            self.font,
+            "White",
+            "Blue",
+            False,
+            action=lambda: ba.action_on_target(
+                self.all_sprites[self.turn_manager.take_turn()],
+                self.all_sprites[self.target],
+            ),
+        )
+        button2 = Button(
+            1300,
+            700,
+            150,
+            25,
+            "Special",
+            self.font,
+            "White",
+            "Blue",
+            False,
+            action=lambda: ba.special_on_target(
+                self.all_sprites[self.turn_manager.take_turn()],
+                self.all_sprites[self.target],
+            ),
+        )
+        self.ui.add_button("roll", button1)
+        self.ui.add_button("heal", button2)
 
     def game_loop(self):
+        """Main game loop."""
         while self.running:
             if self.game_over:
                 self.show_game_over()
@@ -67,6 +110,7 @@ class Game():
             self.clock.tick(5)
 
     def handle_events(self):
+        """Handle all game events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -85,6 +129,7 @@ class Game():
             self.check_level_status()
 
     def handle_sprite_click(self, event):
+        """Handle a click on a sprite."""
         if self.ui.need_target():
             for sprite in self.all_sprites:
                 self.target = sprite.handle_click(event.pos)
@@ -93,13 +138,14 @@ class Game():
                     self.target = ""
 
     def cpu_turn(self):
-        
+        """Simulate the CPU's turn."""
         for _ in range(len(self.enemies)):
             enemy_name = self.turn_manager.take_turn()
             cpu_target = choice(self.player_names)
             self.all_sprites[enemy_name].use_random_action(self.all_sprites[cpu_target])
 
     def update(self):
+        """Update all game elements."""
         self.check_combatant_status()
         self.all_sprites.update()
         self.ui.update_text("player1", str(self.all_sprites.get("Berserker")))
@@ -111,29 +157,47 @@ class Game():
         self.check_level_status()
 
     def draw(self):
+        """Render all game elements to the screen."""
         self.screen.blit(self.background_image, (0, 0))
         self.all_sprites.draw(self.screen)
         self.ui.draw()
-        pygame.draw.rect(self.screen, "Black", pygame.Rect(10,10, 900, 150), 0)
-        self.screen.blit(self.textbox_surface, (10, 10), (0, self.scroll_offset, 900, 150))
-        pygame.draw.rect(self.screen, "White", pygame.Rect(10,10, 900, 150), 2)  # Outline the text box
+        pygame.draw.rect(self.screen, "Black", pygame.Rect(10, 10, 900, 150), 0)
+        self.screen.blit(
+            self.textbox_surface, (10, 10), (0, self.scroll_offset, 900, 150)
+        )
+        pygame.draw.rect(
+            self.screen, "White", pygame.Rect(10, 10, 900, 150), 2
+        )  # Outline the text box
         pygame.display.flip()
 
     def add_enemy(self, x, y, challenge_rating):
+        """Add an enemy to the game."""
         while True:
-            npc_factory = CharacterFactory(source_type="api", data=challenge_rating, x=x, y=y, console=self.ui.console)
+            npc_factory = CharacterFactory(
+                source_type="api",
+                data=challenge_rating,
+                x=x,
+                y=y,
+                console=self.ui.console,
+            )
             npc = npc_factory.get_character()
             npc_name = npc.character._name
             print(npc_name)
-            if npc_name not in self.all_sprites.keys():    
-                break  
+            if npc_name not in self.all_sprites.keys():
+                break
 
         self.all_sprites.add_with_key(npc.character._name, npc)
         self.turn_manager.add_to_queue(npc.character._name)
         self.enemies[npc.character._name] = npc
-        self.ui.add_text(f"enemy{self.enemies.__len__()}", str(self.enemies[npc.character._name]),10, 30)
+        self.ui.add_text(
+            f"enemy{self.enemies.__len__()}",
+            str(self.enemies[npc.character._name]),
+            10,
+            30,
+        )
 
-    def remove_combatant(self,combat_name, ui_name):
+    def remove_combatant(self, combat_name, ui_name):
+        """Remove a combatant from the game."""
         self.all_sprites.__delitem__(combat_name)
         self.turn_manager.remove_from_queue(combat_name)
         self.ui.update_text(ui_name, "")
@@ -145,31 +209,36 @@ class Game():
             self.ui_names.remove(ui_name)
 
     def check_combatant_status(self):
+        """Check if any combatants are dead and remove them."""
         # Create a list of current items to avoid modifying the dictionary while iterating
         combatants = list(zip(self.ui_names, self.all_sprites.values()))
         for name, sprite in combatants:
             if sprite.status_tracker.is_dead():
-                self.remove_combatant(sprite.character._name , name)
+                self.remove_combatant(sprite.character._name, name)
 
     def check_level_status(self):
+        """Check if the level is over."""
         if len(self.player_names) == 0:
             self.game_over = True
         if len(self.enemies) == 0:
             self.set_up_level()
 
     def set_up_level(self):
+        """Set up the next level of the game."""
         self.challenge_rating += 1
         self.add_enemy(1200, 200, self.challenge_rating)
         self.add_enemy(1200, 400, self.challenge_rating)
 
     def show_game_over(self):
+        """Display the game over screen."""
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
             self.screen.fill("Black")
-            game_over_text = self.font.render(f"Game Over. Score: {self.challenge_rating * 100}", True, "White")
+            game_over_text = self.font.render(
+                f"Game Over. Score: {self.challenge_rating * 100}", True, "White"
+            )
             self.screen.blit(game_over_text, (500, 450))
             pygame.display.flip()
-
