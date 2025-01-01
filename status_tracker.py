@@ -9,7 +9,7 @@ class StatusTracker():
         self.conditions = set()
         self.attributes = Ruleset.default_attributes.copy()
 
-    def damage(self, amount):
+    def damage(self, amount, type=""):
         self.current_hp = max(0, self.current_hp - amount)
         return self.current_hp > 0
     

@@ -24,7 +24,7 @@ class Character():
         self.contitions = []
         self._abilities = data["special_abilities"]
         self.actions = (data["actions"] + data["special_abilities"], console)
-        self.legen_actions = data["legendary_actions"]
+        self.legen_actions = (data["legendary_actions"], console)
 
         self._console = console
 
@@ -68,10 +68,11 @@ class Character():
         return self._legen_actions
     
     @legen_actions.setter
-    def legen_actions(self, data):
+    def legen_actions(self, value):
+        data, console = value
         self._legen_actions = []
         for entry in data:
-            self.legen_actions.append(Action(entry))
+            self.legen_actions.append(Action(entry, console))
 
     @property
     def proficiencies(self):
@@ -127,11 +128,17 @@ class Character():
         
         skill_map = {
             "strength": self._str,
+            "str": self._str,  # shorthand for strength
             "dexterity": self._dex,
+            "dex": self._dex,  # shorthand for dexterity
             "constitution": self._con,
+            "con": self._con,  # shorthand for constitution
             "intelligence": self._int,
+            "int": self._int,  # shorthand for intelligence
             "wisdom": self._wis,
+            "wis": self._wis,  # shorthand for wisdom
             "charisma": self._cha,
+            "cha": self._cha,  # shorthand for charisma
         }
 
         # Check if the skill is part of the stat abilities

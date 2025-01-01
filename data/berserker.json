@@ -34,7 +34,13 @@
     "damage_vulnerabilities": [],
     "damage_resistances": [],
     "damage_immunities": [],
-    "condition_immunities": [],
+    "condition_immunities": [
+    {
+      "index": "paralyzed",
+      "name": "Paralyzed",
+      "url": "/api/conditions/paralyzed"
+    }
+  ],
     "senses": {
         "passive_perception": 10
     },

@@ -28,7 +28,11 @@ class Combatant(pygame.sprite.Sprite):
 
 
     def apply_condition(self, condition):
-        self.status_tracker.apply_condition(condition)
+        if condition not in self.character.condition_immunities:
+            self.status_tracker.apply_condition(condition)
+            self.console.log(f"{self.character._name} is now {condition}.")
+        else:
+            self.console.log(f"{self.character._name} is immune to {condition}.")
 
     def remove_condition(self, condition):
         self.status_tracker.remove_condition(condition)

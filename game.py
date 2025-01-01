@@ -108,8 +108,13 @@ class Game():
         pygame.display.flip()
 
     def add_enemy(self, x, y):
-        npc_factory = CharacterFactory(source_type="api", data="2", x=x, y=y ,console = self.ui.console)
-        npc = npc_factory.get_character()
+        while True:
+            npc_factory = CharacterFactory(source_type="api", data="10", x=x, y=y, console=self.ui.console)
+            npc = npc_factory.get_character()
+            npc_name = npc.character._name
+            print(npc_name)
+            if npc_name not in self.all_sprites.keys():    
+                break  
 
         self.all_sprites.add_with_key(npc.character._name, npc)
         self.turn_manager.add_to_queue(npc.character._name)

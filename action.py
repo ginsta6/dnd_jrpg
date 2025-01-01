@@ -18,13 +18,30 @@ class Action():
     def use_action(self, target, advantage: int):
         if self._usage:
             # Special use algorithm (saving throw for target)
-            ...
+            self._special_attack(target)
         elif self._name == "Multiattack":
             # multiattack alogrithm
             ...
         elif self._damage:
             # regular attack algorithm
             self._regular_attack(target, advantage)
+
+    def _special_attack(self, target):
+        if self._usage == "recharge":
+            # Check if the action can be used
+            if Dice.roll_dice("1d6") >= 5:
+                self._console.log(f"{self._name} recharged!")
+            else:
+                self._console.log(f"{self._name} failed to recharge.")
+                return
+
+        condition = self.get_condition()
+        if condition[0]:
+            self.attack_saving_throw_condition(target, condition)
+        elif self._damage:
+            print("doing a special attack")
+            self.attack_saving_throw_damage(target)
+
 
     def _regular_attack(self, target, advantage: int):
         adjective = ""
@@ -46,21 +63,56 @@ class Action():
 
             condition = self.get_condition()
             if condition[0]: 
-                self.attack_saving_throw(target, condition)
+                self.attack_saving_throw_condition(target, condition)
 
             self._console.log(f"Rolled for damage and got: {damage}")
             
-    def attack_saving_throw(self, target, condition):
+    def attack_saving_throw_condition(self, target, condition):
         condition_name, dc, saving_throw_skill = condition
         if dc:
             saving_throw = Dice.roll_dice("1d20") + target.character.get_skill(saving_throw_skill) // 2
             self._console.log(f"Rolled a {saving_throw_skill} saving throw and got: {saving_throw}")
             if saving_throw < int(dc):
-                target.status_tracker.apply_condition(condition_name)
+                target.apply_condition(condition_name)
             else:
                 self._console.log(f"{target.character._name} resisted the {condition_name} condition.")
         else:
-            target.status_tracker.apply_condition(condition_name)
+            target.apply_condition(condition_name)
+
+    def attack_saving_throw_damage(self, target):
+
+        damage_type = self._damage[0]["damage_type"]["index"]
+        damage_dice = self._damage[0]["damage_dice"]
+        dc = self._dc["dc_value"]
+        saving_throw_skill = self._dc["dc_type"]["index"]
+        
+        if dc:
+            # Calculate saving throw roll
+            saving_throw = Dice.roll_dice("1d20") + target.character.get_skill(saving_throw_skill) // 2
+            self._console.log(f"Rolled a {saving_throw_skill} saving throw and got: {saving_throw}")
+            
+            # Apply damage based on success/failure of the saving throw
+            if saving_throw < int(dc):
+                # Failure: apply full damage
+                self._apply_damage(target, damage_type, damage_dice)
+            else:
+                # Success: apply half damage
+                if self._dc["success_type"] == "half":
+                    self._apply_damage(target, damage_type, damage_dice, half_damage=True)
+        else:
+            # No saving throw needed, just apply full damage
+            self._apply_damage(target, damage_type, damage_dice)
+
+    def _apply_damage(self, target, damage_type, damage_dice, half_damage=False):
+        # Roll damage dice and apply damage to the target
+        damage = Dice.roll_dice(damage_dice)
+        if half_damage:
+            damage //= 2
+        target.status_tracker.damage(damage, damage_type)
+
+        # Log the damage dealt
+        self._console.log(f"Dealt {damage} {damage_type} damage to {target.character._name}")
+
 
     def is_name_and_description_only(self):
         # Check if all other fields are None or empty
