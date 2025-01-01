@@ -4,7 +4,7 @@ from random import randint
 from action import Action
 
 
-class Character():
+class Character:
     def __init__(self, data: dict, console):
         self._name = data["name"]
         self._type = data["type"]
@@ -30,17 +30,20 @@ class Character():
 
     @classmethod
     def create_player(cls, filename: str):
+        """Create a player character from a JSON file."""
         with open(filename, "r") as file:
             data = json.load(file)
         return cls(data)
 
     @classmethod
     def create_monster(cls, challenge_rating: int):
+        """Create a monster character from the D&D 5e API."""
         data = cls.pull_monster_data(challenge_rating)
         return cls(data)
 
     @classmethod
     def pull_monster_data(cls, ch):
+        """Pull monster data from the D&D 5e API."""
         dnd_url = "https://www.dnd5eapi.co/api/monsters"
         headers = {"Accept": "application/json"}
 
@@ -48,14 +51,14 @@ class Character():
         response = requests.get(url=dnd_url + challenge_rating, headers=headers).json()
         monster_dict = response["results"]
         monster_nr = randint(0, response["count"] - 1)
-        monster_index ="/" + monster_dict[monster_nr]["index"]
+        monster_index = "/" + monster_dict[monster_nr]["index"]
 
         return requests.get(url=dnd_url + monster_index, headers=headers).json()
-    
+
     @property
     def actions(self):
         return self._actions
-    
+
     @actions.setter
     def actions(self, value):
         data, console = value
@@ -65,22 +68,27 @@ class Character():
         self.add_multiattack()
 
     def add_multiattack(self):
+        """Add individual attacks to the Multiattack action options."""
         for action in self._actions:
             if action._name == "Multiattack":
                 # Process the Multiattack and add the individual attacks to options
-                for multiattack_action in action._actions:  # Look at each sub-action in Multiattack
+                for (
+                    multiattack_action
+                ) in action._actions:  # Look at each sub-action in Multiattack
                     action_name = multiattack_action["action_name"]
                     action_count = int(multiattack_action["count"])
                     for _ in range(action_count):
-                        matched_attacks = [attack for attack in self._actions if attack._name == action_name]
+                        matched_attacks = [
+                            attack
+                            for attack in self._actions
+                            if attack._name == action_name
+                        ]
                         action._options.extend(matched_attacks)
 
-
-    
     @property
     def legen_actions(self):
         return self._legen_actions
-    
+
     @legen_actions.setter
     def legen_actions(self, value):
         data, console = value
@@ -91,18 +99,20 @@ class Character():
     @property
     def proficiencies(self):
         return self._proficiencies
-    
+
     @proficiencies.setter
     def proficiencies(self, data):
         prof_list = []
         for prof in data:
-            prof_list.append({"name": prof["proficiency"]["name"], "value": prof["value"]})
+            prof_list.append(
+                {"name": prof["proficiency"]["name"], "value": prof["value"]}
+            )
         self._proficiencies = prof_list
-    
+
     @property
     def condition_immunities(self):
         return self._condition_immunities
-    
+
     @condition_immunities.setter
     def condition_immunities(self, data):
         cond_list = []
@@ -113,12 +123,13 @@ class Character():
     @property
     def ac(self):
         return self._ac
-    
+
     @property
     def hp(self):
         return self._hp
-    
+
     def use_action(self, action_id, target, my_attributes):
+        """Use the specified action"""
         if not my_attributes.get("can_take_actions", True):
             self._console.log(f"{self._name} can't do that right now")
             return
@@ -130,8 +141,12 @@ class Character():
         target_attributes = target.status_tracker.attributes
 
         # Determine advantage or disadvantage
-        advantage = my_attributes.get("attack_advantage", False) or target_attributes.get("attackers_have_advantage", False)
-        disadvantage = my_attributes.get("attack_disadvantage", False) or target_attributes.get("attackers_have_disadvantage", False)
+        advantage = my_attributes.get(
+            "attack_advantage", False
+        ) or target_attributes.get("attackers_have_advantage", False)
+        disadvantage = my_attributes.get(
+            "attack_disadvantage", False
+        ) or target_attributes.get("attackers_have_disadvantage", False)
 
         # Calculate final advantage state
         if advantage and disadvantage:
@@ -147,12 +162,13 @@ class Character():
         self.actions[action_id].use_action(target, advantage_state)
 
     def check_action(self, action_id):
-       return self.actions[action_id].is_name_and_description_only()
+        """Check if the action is a name and description only action."""
+        return self.actions[action_id].is_name_and_description_only()
 
     def get_skill(self, skill_name: str):
         """Returns the ability score corresponding to a skill or saving throw."""
         skill_name = skill_name.lower()
-        
+
         skill_map = {
             "strength": self._str,
             "str": self._str,  # shorthand for strength
@@ -171,24 +187,24 @@ class Character():
         # Check if the skill is part of the stat abilities
         if skill_name in skill_map:
             return skill_map[skill_name]
-            
 
     def __repr__(self):
-        return (f"Name: {self._name}\n"
-                    f"Type: {self._type}\n"
-                    f"HP: {self._hp}\n"
-                    f"AC: {self._ac}\n"
-                    f"Strength: {self._str}\n"
-                    f"Constitution: {self._con}\n"
-                    f"Intelligence: {self._int}\n"
-                    f"Wisdom: {self._wis}\n"
-                    f"Charisma: {self._cha}\n"
-                    f"Proficiencies: {self.proficiencies if self.proficiencies else 'None'}\n"
-                    f"Proficiency Bonus: {self._prof_bonus}\n"
-                    f"Damage Resistances: {self._damage_resistances if self._damage_resistances else 'None'}\n"
-                    f"Damage Immunities: {self._damage_immunities if self._damage_immunities else 'None'}\n"
-                    f"Condition Immunities: {self.condition_immunities if self.condition_immunities else 'None'}\n"
-                    f"Abilities: {self._abilities if self._abilities else 'None'}\n"
-                    f"Actions: {self._actions if self._actions else 'None'}\n"
-                    f"Legendary Actions: {self._legen_actions if self._legen_actions else 'None'}")
-    
+        return (
+            f"Name: {self._name}\n"
+            f"Type: {self._type}\n"
+            f"HP: {self._hp}\n"
+            f"AC: {self._ac}\n"
+            f"Strength: {self._str}\n"
+            f"Constitution: {self._con}\n"
+            f"Intelligence: {self._int}\n"
+            f"Wisdom: {self._wis}\n"
+            f"Charisma: {self._cha}\n"
+            f"Proficiencies: {self.proficiencies if self.proficiencies else 'None'}\n"
+            f"Proficiency Bonus: {self._prof_bonus}\n"
+            f"Damage Resistances: {self._damage_resistances if self._damage_resistances else 'None'}\n"
+            f"Damage Immunities: {self._damage_immunities if self._damage_immunities else 'None'}\n"
+            f"Condition Immunities: {self.condition_immunities if self.condition_immunities else 'None'}\n"
+            f"Abilities: {self._abilities if self._abilities else 'None'}\n"
+            f"Actions: {self._actions if self._actions else 'None'}\n"
+            f"Legendary Actions: {self._legen_actions if self._legen_actions else 'None'}"
+        )

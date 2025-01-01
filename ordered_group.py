@@ -1,5 +1,6 @@
 import pygame
 
+
 class OrderedDictGroup(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
@@ -14,7 +15,7 @@ class OrderedDictGroup(pygame.sprite.Group):
     def __getitem__(self, key):
         """Get a sprite by its key."""
         return self._sprites[key]
-    
+
     def get(self, key, default=""):
         """Get a sprite by its key, or return default if key does not exist."""
         return self._sprites.get(key, default)
